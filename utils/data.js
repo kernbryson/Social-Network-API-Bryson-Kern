@@ -1,4 +1,4 @@
-const names = [
+const users = [
   'Aaran',
   'Aaren',
   'Aarez',
@@ -100,7 +100,7 @@ const getRandomArrItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 // Gets a random full name
 const getRandomName = () =>
-  `${getRandomArrItem(names)} ${getRandomArrItem(names)}`;
+  `${getRandomArrItem(users)} ${getRandomArrItem(users)}`;
 
 // Function to generate random assignments that we can add to student object.
 const getRandomAssignments = (int) => {

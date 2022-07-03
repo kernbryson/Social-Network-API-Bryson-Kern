@@ -1,34 +1,44 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 // const assignmentSchema = require('./Assignment');
 
 const userSchema = new Schema(
-    {
-      username: {
-        type: String,
-        required: true,
-        max_length: 25,
-        unique: true,
-      },
-      email: {
-        type: String,
-        required: true,
-        unique: true,
-        validate: {
-            validator: () => Promise.resolve(false),
-            message: 'Email validation failed'
-          }
-      },
-      thoughts: [thoughtSchema],
-      friends: [friendSchema],
+  {
+    username: {
+      type: String,
+      required: true,
+      max_length: 25,
+      unique: true,
     },
-    {
-      toJSON: {
-        getters: true,
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      validate: {
+        validator: () => Promise.resolve(false),
+        message: "Email validation failed",
       },
-    }
-  );
-  
-  const User = model('user', userSchema);
-  
-  module.exports = User;
-  
+    },
+    thoughts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Thought",
+      },
+    ],
+
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+  },
+  {
+    toJSON: {
+      getters: true,
+    },
+  }
+);
+
+const User = model("user", userSchema);
+
+module.exports = User;
