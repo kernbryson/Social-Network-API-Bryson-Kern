@@ -1,4 +1,4 @@
-const { Schema, Types } = require('mongoose');
+const { Schema, Types } = require("mongoose");
 
 const reactionSchema = new Schema(
   {
@@ -10,7 +10,7 @@ const reactionSchema = new Schema(
       type: String,
       required: true,
       maxlength: 280,
-      default: 'Unnamed reaction',
+      default: "Unnamed reaction",
     },
     username: {
       type: String,
@@ -29,4 +29,4 @@ const reactionSchema = new Schema(
   }
 );
 
-module.exports = assignmentSchema;
+module.exports = reactionSchema;

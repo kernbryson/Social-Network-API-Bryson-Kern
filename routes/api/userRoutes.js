@@ -6,7 +6,9 @@ const {
   deleteUser,
   addAssignment,
   removeAssignment,
-} = require('../../controllers/userController');
+  
+} = require('../../controllers/studentController');
+
 
 // /api/users
 router.route('/').get(getUsers).post(createUser);
@@ -19,5 +21,6 @@ router.route('/:userId/assignments').post(addAssignment);
 
 // /api/users/:userId/assignments/:assignmentId
 router.route('/:userId/assignments/:assignmentId').delete(removeAssignment);
+
 
 module.exports = router;
