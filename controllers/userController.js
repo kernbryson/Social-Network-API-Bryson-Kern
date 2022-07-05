@@ -1,60 +1,44 @@
-const { ObjectId } = require('mongoose').Types;
-const { User, Course } = require('../models');
-
-// Aggregate function to get the number of users overall
-const headCount = async () =>
-  User.aggregate()
-    .count('userCount')
-    .then((numberOfUsers) => numberOfUsers);
-
-// Aggregate function for getting the overall grade using $avg
-const grade = async (userId) =>
-  User.aggregate([
-    // only include the given user by using $match
-    { $match: { _id: ObjectId(userId) } },
-    {
-      $unwind: '$assignments',
-    },
-    {
-      $group: {
-        _id: ObjectId(userId),
-        overallGrade: { $avg: '$assignments.score' },
-      },
-    },
-  ]);
+const { ObjectId } = require("mongoose").Types;
+const { User } = require("../models");
 
 module.exports = {
   // Get all users
   getUsers(req, res) {
     User.find()
-      .then(async (users) => {
-        const userObj = {
-          users,
-          headCount: await headCount(),
-        };
-        return res.json(userObj);
+      .populate({
+        path: "thoughts",
+        select: "__v",
       })
+      .populate({
+        path: "friends",
+        select: "__v",
+      })
+      .select("-__v")
+      .sort({ _id: -1 })
+      .then((user) => res.json(user))
       .catch((err) => {
         console.log(err);
-        return res.status(500).json(err);
+        res.status(500).json(err);
       });
   },
-  
+
   // Get a single user
   getSingleUser(req, res) {
     User.findOne({ _id: req.params.userId })
-      .select('-__v')
-      .then(async (user) =>
-        !user
-          ? res.status(404).json({ message: 'No user with that ID' })
-          : res.json({
-              user,
-              grade: await grade(req.params.userId),
-            })
-      )
+      .populate({
+        path: "thoughts",
+        select: "__v",
+      })
+      .populate({
+        path: "friends",
+        select: "__v",
+      })
+      .select("-__v")
+      .sort({ _id: -1 })
+      .then((user) => res.json(user))
       .catch((err) => {
         console.log(err);
-        return res.status(500).json(err);
+        res.status(500).json(err);
       });
   },
   // create a new user
@@ -68,7 +52,7 @@ module.exports = {
     User.findOneAndRemove({ _id: req.params.userId })
       .then((user) =>
         !user
-          ? res.status(404).json({ message: 'No such user exists' })
+          ? res.status(404).json({ message: "No such user exists" })
           : Course.findOneAndUpdate(
               { users: req.params.userId },
               { $pull: { users: req.params.userId } },
@@ -78,19 +62,38 @@ module.exports = {
       .then((course) =>
         !course
           ? res.status(404).json({
-              message: 'User deleted, but no courses found',
+              message: "User deleted, but no courses found",
             })
-          : res.json({ message: 'User successfully deleted' })
+          : res.json({ message: "User successfully deleted" })
       )
       .catch((err) => {
         console.log(err);
         res.status(500).json(err);
       });
   },
-
+  updateUser(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.userId }, { $set: req.body },
+      {
+        new: true,
+        runValidators: true,
+      }
+    )
+      .then((updatedUser) =>
+        !updatedUser
+          ? res.status(404).json({
+              message: "Could not update user",
+            })
+          : res.json({ message: "User successfully updated!" })
+      )
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
+  },
   // Add an assignment to a user
   addAssignment(req, res) {
-    console.log('You are adding an assignment');
+    console.log("You are adding an assignment");
     console.log(req.body);
     User.findOneAndUpdate(
       { _id: req.params.userId },
@@ -99,9 +102,7 @@ module.exports = {
     )
       .then((user) =>
         !user
-          ? res
-              .status(404)
-              .json({ message: 'No user found with that ID :(' })
+          ? res.status(404).json({ message: "No user found with that ID :(" })
           : res.json(user)
       )
       .catch((err) => res.status(500).json(err));
@@ -115,9 +116,7 @@ module.exports = {
     )
       .then((user) =>
         !user
-          ? res
-              .status(404)
-              .json({ message: 'No user found with that ID :(' })
+          ? res.status(404).json({ message: "No user found with that ID :(" })
           : res.json(user)
       )
       .catch((err) => res.status(500).json(err));
