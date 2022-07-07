@@ -32,8 +32,6 @@ const email = [
   "Elijah_Yarwood6264@irrepsy.com",
 ];
 
-
-const getEmail = () => `${getRandomArrItem(email)}`;
 // Get a random item given an array
 const getRandomArrItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 function nameAndEmail() {

@@ -73,7 +73,8 @@ module.exports = {
   },
   updateUser(req, res) {
     User.findOneAndUpdate(
-      { _id: req.params.userId }, { $set: req.body },
+      { _id: req.params.userId },
+      { $set: req.body },
       {
         new: true,
         runValidators: true,
@@ -91,21 +92,29 @@ module.exports = {
         res.status(500).json(err);
       });
   },
-  // Add an assignment to a user
-  addAssignment(req, res) {
-    console.log("You are adding an assignment");
-    console.log(req.body);
+  // Add a friend to a user
+  addFriend(req, res) {
+    console.log("You are adding a friend");
+    console.log(req.params.friendId);
     User.findOneAndUpdate(
       { _id: req.params.userId },
-      { $addToSet: { assignments: req.body } },
+      { $push: { friends: req.params.friendId } },
       { runValidators: true, new: true }
     )
-      .then((user) =>
-        !user
-          ? res.status(404).json({ message: "No user found with that ID :(" })
-          : res.json(user)
-      )
-      .catch((err) => res.status(500).json(err));
+      .populate({
+        path: "friends",
+        select: "-__v",
+      })
+      .select("-__v")
+      .then((friend) => {
+        console.log(friend);
+        if (!friend) {
+          res.status(404).json({ message: "No User with this  ID" });
+          return;
+        }
+        res.json(friend);
+      })
+      .catch((err) => res.json(err));
   },
   // Remove assignment from a user
   removeAssignment(req, res) {
