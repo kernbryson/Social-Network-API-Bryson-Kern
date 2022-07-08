@@ -84,15 +84,15 @@ module.exports = {
       });
   },
   addReaction(req, res) {
+    const reactionInfo = {
+      reactionBody: req.body.reactionBody,
+      username: req.body.username,
+    };
     Thought.findOneAndUpdate(
       { _id: req.params.thoughtId },
-      { $push: { reactions: req.params.reactionId } },
+      { $push: { reactions: reactionInfo } },
       { runValidators: true, new: true }
     )
-      .populate({
-        path: "reactions",
-        select: "-__v",
-      })
       .select("-__v")
       .then((reaction) => {
         console.log(reaction);
@@ -104,5 +104,23 @@ module.exports = {
         res.json(reaction);
       })
       .catch((err) => res.json(err));
+  },
+  deleteReaction(req, res) {
+    Thought.findOneAndUpdate(
+      { _id: req.params.thoughtId },
+      { $pull: { reactions: req.body } },
+      { new: true },
+      console.log({ reactions: req.params.reactionId })
+    )
+      .then((reactionData) => {
+        if (!reactionData) {
+          return res.status(404).json({ message: "No user with this id!" });
+        }
+        res.json(reactionData);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
   },
 };
