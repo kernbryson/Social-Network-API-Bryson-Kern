@@ -5,18 +5,24 @@ const Thought = require("../models/Thought");
 module.exports = {
   postThought(req, res) {
     Thought.create(req.body)
-    .then(({_id}) => {
-        return User.findOneAndUpdate({ _id: params.userId}, {$push: {thought: _id}}, {new: true});
-    })
-    .then(thought => {
-        if(!thought) {
-            res.status(404).json({message: 'No thoughts with this particular ID!'});
-            return;
+      .then(({ _id }) => {
+        return User.findOneAndUpdate(
+          { _id: params.userId },
+          { $push: { thought: _id } },
+          { new: true }
+        );
+      })
+      .then((thought) => {
+        if (!thought) {
+          res
+            .status(404)
+            .json({ message: "No thoughts with this particular ID!" });
+          return;
         }
-        res.json(thought)
-    })
-    .catch(err => res.json(err));
-},
+        res.json(thought);
+      })
+      .catch((err) => res.json(err));
+  },
 
   getThoughts(req, res) {
     Thought.find()
@@ -76,5 +82,27 @@ module.exports = {
         console.log(err);
         res.status(500).json(err);
       });
+  },
+  addReaction(req, res) {
+    Thought.findOneAndUpdate(
+      { _id: req.params.thoughtId },
+      { $push: { reactions: req.params.reactionId } },
+      { runValidators: true, new: true }
+    )
+      .populate({
+        path: "reactions",
+        select: "-__v",
+      })
+      .select("-__v")
+      .then((reaction) => {
+        console.log(reaction);
+        if (!reaction) {
+          res.status(404).json({ message: "No reaction with this  ID" });
+          return;
+        }
+        console.log(reaction);
+        res.json(reaction);
+      })
+      .catch((err) => res.json(err));
   },
 };

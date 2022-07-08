@@ -91,25 +91,20 @@ module.exports = {
   },
 
   deleteFriend(req, res) {
-    User.findOneAndDelete(
+    User.findOneAndUpdate(
       { _id: req.params.userId },
-      { $pull: { friends: { friends: req.params.friendId } } },
-      { runValidators: true, new: true }
+      { $pull: { friends: req.params.friendId } },
+      { new: true }
     )
-      .populate({
-        path: "friends",
-        select: "-__v",
-      })
-      .select("-__v")
       .then((friendData) => {
         if (!friendData) {
-          res
-            .status(404)
-            .json({ message: "No friends with this particular ID!" });
-          return;
+          return res.status(404).json({ message: "No user with this id!" });
         }
         res.json(friendData);
       })
-      .catch((err) => res.status(400).json(err));
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
   },
 };
