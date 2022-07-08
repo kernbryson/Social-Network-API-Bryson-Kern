@@ -16,14 +16,6 @@ module.exports = {
   // Get a single user
   getSingleUser(req, res) {
     User.findOne({ _id: req.params.userId })
-      .populate({
-        path: "thoughts",
-        select: "__v",
-      })
-      .populate({
-        path: "friends",
-        select: "__v",
-      })
       .select("-__v")
       .sort({ _id: -1 })
       .then((user) => res.json(user))
@@ -41,26 +33,16 @@ module.exports = {
   // Delete a user and remove them from the course
   deleteUser(req, res) {
     User.findOneAndRemove({ _id: req.params.userId })
-      .then((user) =>
-        !user
-          ? res.status(404).json({ message: "No such user exists" })
-          : Course.findOneAndUpdate(
-              { users: req.params.userId },
-              { $pull: { users: req.params.userId } },
-              { new: true }
-            )
-      )
-      .then((course) =>
-        !course
-          ? res.status(404).json({
-              message: "User deleted, but no courses found",
-            })
-          : res.json({ message: "User successfully deleted" })
-      )
-      .catch((err) => {
-        console.log(err);
-        res.status(500).json(err);
-      });
+      .then((userData) => {
+        if (!userData) {
+          res
+            .status(404)
+            .json({ message: "No users with this particular ID!" });
+          return;
+        }
+        res.json(userData);
+      })
+      .catch((err) => res.status(400).json(err));
   },
   updateUser(req, res) {
     User.findOneAndUpdate(
@@ -107,18 +89,27 @@ module.exports = {
       })
       .catch((err) => res.json(err));
   },
-  // Remove assignment from a user
-  removeAssignment(req, res) {
-    User.findOneAndUpdate(
+
+  deleteFriend(req, res) {
+    User.findOneAndDelete(
       { _id: req.params.userId },
-      { $pull: { assignment: { assignmentId: req.params.assignmentId } } },
+      { $pull: { friends: { friends: req.params.friendId } } },
       { runValidators: true, new: true }
     )
-      .then((user) =>
-        !user
-          ? res.status(404).json({ message: "No user found with that ID :(" })
-          : res.json(user)
-      )
-      .catch((err) => res.status(500).json(err));
+      .populate({
+        path: "friends",
+        select: "-__v",
+      })
+      .select("-__v")
+      .then((friendData) => {
+        if (!friendData) {
+          res
+            .status(404)
+            .json({ message: "No friends with this particular ID!" });
+          return;
+        }
+        res.json(friendData);
+      })
+      .catch((err) => res.status(400).json(err));
   },
 };
