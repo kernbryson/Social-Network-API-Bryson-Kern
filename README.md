@@ -16,7 +16,7 @@ This project allows developers to test routes created by mongoose. Social Networ
 
 ## Installation
 
-In order to use the social network API one must first clone my repo from github. After that the user must open the application files in VS code and do a npm install to get all the packages. Then you simply type in npm start in the console. Once the server is running the user can test the routes in insomnia.
+In order to install the social network API one must first clone my repo from github. After that the user must open the application files in VS code and do a npm install to get all the packages. Then you simply type in npm start in the console. Once the server is running the user can test the routes in insomnia.
 
 ## Usage
 
